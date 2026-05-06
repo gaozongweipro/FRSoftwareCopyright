@@ -12,4 +12,22 @@ describe('DashboardView', () => {
     expect(wrapper.text()).toContain('模板')
     expect(wrapper.text()).toContain('Agent')
   })
+
+  it('disables compression before the task is completed', () => {
+    const store = createAppStore()
+    const wrapper = mount(DashboardView, { props: { store } })
+    const compressButton = wrapper.find('[data-test="compress-task"]')
+    expect(compressButton.attributes('disabled')).toBeDefined()
+  })
+
+  it('shows the latest runtime error from the store', () => {
+    const store = createAppStore()
+    store.operation.value.lastError = {
+      code: 'mock-node-failed',
+      message: '节点生成失败',
+      recoverable: true
+    }
+    const wrapper = mount(DashboardView, { props: { store } })
+    expect(wrapper.text()).toContain('节点生成失败')
+  })
 })

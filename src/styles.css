@@ -263,6 +263,11 @@ h2 {
   background: #fafbfc;
 }
 
+.node-row.failed {
+  border-color: #f3b5ad;
+  background: #fff7f5;
+}
+
 .node-row strong,
 .node-row span {
   display: block;
@@ -271,6 +276,12 @@ h2 {
 .node-row span {
   margin-top: 4px;
   color: #52606d;
+  font-size: 12px;
+}
+
+.node-error {
+  margin: 6px 0 0;
+  color: #b42318;
   font-size: 12px;
 }
 

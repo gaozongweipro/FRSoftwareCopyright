@@ -13,8 +13,8 @@ const task = computed(() => props.store.currentTask.value)
 const stats = computed(() => task.value?.stats)
 const documentStage = computed(() => task.value?.stages.find((stage) => stage.id === 'document'))
 
-function startGeneration(): void {
-  props.store.startGeneration()
+async function startGeneration(): Promise<void> {
+  await props.store.startGeneration()
 }
 
 function openResource(resource: ResourceArtifact): void {
@@ -26,17 +26,17 @@ function saveResource(resourceId: string, content: string): void {
   selectedResource.value = null
 }
 
-function regenerate(node: WorkflowNode): void {
-  props.store.regenerate(node.resource.id)
+async function regenerate(node: WorkflowNode): Promise<void> {
+  await props.store.regenerate(node.resource.id)
 }
 
-function regenerateResource(resourceId: string): void {
-  props.store.regenerate(resourceId)
+async function regenerateResource(resourceId: string): Promise<void> {
+  await props.store.regenerate(resourceId)
   selectedResource.value = null
 }
 
-function regenerateWithSuggestion(resourceId: string, suggestion: string): void {
-  props.store.regenerate(resourceId, suggestion)
+async function regenerateWithSuggestion(resourceId: string, suggestion: string): Promise<void> {
+  await props.store.regenerate(resourceId, suggestion)
   selectedResource.value = null
 }
 </script>
@@ -58,8 +58,14 @@ function regenerateWithSuggestion(resourceId: string, suggestion: string): void 
           <option value="web">Web 端</option>
         </select>
       </label>
-      <button class="primary-button" data-test="start-generation" type="button" @click="startGeneration">
-        开始生成
+      <button
+        class="primary-button"
+        data-test="start-generation"
+        type="button"
+        :disabled="store.operation.value.generating"
+        @click="startGeneration"
+      >
+        {{ store.operation.value.generating ? '生成中' : '开始生成' }}
       </button>
     </div>
 
@@ -84,6 +90,11 @@ function regenerateWithSuggestion(resourceId: string, suggestion: string): void 
       </button>
     </section>
 
+    <section v-if="store.operation.value.lastError" class="attention-panel">
+      <h2>执行异常</h2>
+      <p>{{ store.operation.value.lastError.message }}</p>
+    </section>
+
     <section class="summary-strip" aria-label="生成结果摘要">
       <button class="address-button" type="button" :disabled="!task">
         <span>项目地址</span>
@@ -93,7 +104,13 @@ function regenerateWithSuggestion(resourceId: string, suggestion: string): void 
         <span>文档地址</span>
         <strong>{{ task?.documentDirectory ?? '生成后显示' }}</strong>
       </button>
-      <button class="address-button" type="button" :disabled="!task" @click="store.compressCurrentTask">
+      <button
+        class="address-button"
+        data-test="compress-task"
+        type="button"
+        :disabled="!store.canCompressCurrentTask() || store.operation.value.compressing"
+        @click="store.compressCurrentTask"
+      >
         <span>压缩包</span>
         <strong>{{ task?.zipPath ?? '待压缩输出' }}</strong>
       </button>
@@ -112,14 +129,16 @@ function regenerateWithSuggestion(resourceId: string, suggestion: string): void 
           <span>{{ stage.status }}</span>
         </header>
         <div class="node-list">
-          <article v-for="node in stage.nodes" :key="node.id" class="node-row">
+          <article v-for="node in stage.nodes" :key="node.id" class="node-row" :class="node.status">
             <div>
               <strong>{{ node.name }}</strong>
-              <span>{{ node.resource.previewLabel }}</span>
+              <span>{{ node.resource.previewLabel }} · {{ node.status }}</span>
+              <p v-if="node.error" class="node-error">{{ node.error.message }}</p>
             </div>
             <div class="node-actions">
               <button type="button" @click="openResource(node.resource)">预览/编辑</button>
               <button type="button" @click="regenerate(node)">重新生成</button>
+              <button v-if="node.status === 'failed'" type="button" @click="regenerate(node)">重试</button>
               <button type="button" @click="openResource(node.resource)">建议重生成</button>
             </div>
           </article>
