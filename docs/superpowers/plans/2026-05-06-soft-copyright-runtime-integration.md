@@ -48,7 +48,7 @@
 - Modify: `src/domain/generation.ts`
 - Modify: `src/domain/generation.test.ts`
 
-- [ ] **Step 1: Add failing tests for task events**
+- [x] **Step 1: Add failing tests for task events**
 
 Add these tests to `src/domain/generation.test.ts`:
 
@@ -115,7 +115,7 @@ it('allows compression only after the document stage is completed', () => {
 })
 ```
 
-- [ ] **Step 2: Run the event tests and confirm failure**
+- [x] **Step 2: Run the event tests and confirm failure**
 
 Run:
 
@@ -125,7 +125,7 @@ npm run test -- src/domain/generation.test.ts
 
 Expected: FAIL because `createInitialGenerationTask`, `applyTaskEvent`, `retryFailedNode`, `canCompressTask`, and `WorkflowNode.error` do not exist yet.
 
-- [ ] **Step 3: Extend domain types**
+- [x] **Step 3: Extend domain types**
 
 Update `src/domain/types.ts` with these additions:
 
@@ -188,7 +188,7 @@ export interface GenerationTask {
 }
 ```
 
-- [ ] **Step 4: Implement event helpers**
+- [x] **Step 4: Implement event helpers**
 
 In `src/domain/generation.ts`, add exports with this behavior:
 
@@ -243,7 +243,7 @@ export function canCompressTask(task: GenerationTask | null): boolean {
 
 Implement `applyEventWithoutStats` in the same file so every `TaskEvent` updates task/stage/node statuses and error fields deterministically.
 
-- [ ] **Step 5: Run domain verification**
+- [x] **Step 5: Run domain verification**
 
 Run:
 
@@ -254,7 +254,7 @@ npm run build
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit domain event model**
+- [x] **Step 6: Commit domain event model**
 
 Run:
 
@@ -270,7 +270,7 @@ git commit -m "feat: add generation task event model"
 - Create: `src/runtime/mockRuntime.ts`
 - Create: `src/runtime/mockRuntime.test.ts`
 
-- [ ] **Step 1: Write runtime tests**
+- [x] **Step 1: Write runtime tests**
 
 Create `src/runtime/mockRuntime.test.ts`:
 
@@ -322,7 +322,7 @@ describe('mock runtime', () => {
 })
 ```
 
-- [ ] **Step 2: Run runtime tests and confirm failure**
+- [x] **Step 2: Run runtime tests and confirm failure**
 
 Run:
 
@@ -332,7 +332,7 @@ npm run test -- src/runtime/mockRuntime.test.ts
 
 Expected: FAIL because `src/runtime` does not exist.
 
-- [ ] **Step 3: Define runtime contracts**
+- [x] **Step 3: Define runtime contracts**
 
 Create `src/runtime/types.ts`:
 
@@ -390,7 +390,7 @@ export interface GenerationRuntime {
 }
 ```
 
-- [ ] **Step 4: Implement mock runtime**
+- [x] **Step 4: Implement mock runtime**
 
 Create `src/runtime/mockRuntime.ts`:
 
@@ -476,7 +476,7 @@ function nowText(): string {
 }
 ```
 
-- [ ] **Step 5: Run runtime verification**
+- [x] **Step 5: Run runtime verification**
 
 Run:
 
@@ -487,7 +487,7 @@ npm run build
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit runtime contract**
+- [x] **Step 6: Commit runtime contract**
 
 Run:
 
@@ -502,7 +502,7 @@ git commit -m "feat: add mock generation runtime"
 - Modify: `src/stores/appStore.ts`
 - Modify: `src/stores/appStore.test.ts`
 
-- [ ] **Step 1: Replace Store tests with async runtime expectations**
+- [x] **Step 1: Replace Store tests with async runtime expectations**
 
 Extend `src/stores/appStore.test.ts` with:
 
@@ -537,7 +537,7 @@ it('applies runtime task events when generation starts', async () => {
 })
 ```
 
-- [ ] **Step 2: Run Store tests and confirm async failures**
+- [x] **Step 2: Run Store tests and confirm async failures**
 
 Run:
 
@@ -547,7 +547,7 @@ npm run test -- src/stores/appStore.test.ts
 
 Expected: FAIL because Store actions are still synchronous and no `operation` ref exists.
 
-- [ ] **Step 3: Refactor Store to accept runtime**
+- [x] **Step 3: Refactor Store to accept runtime**
 
 In `src/stores/appStore.ts`, change `createAppStore()` to:
 
@@ -570,7 +570,7 @@ export function createAppStore(runtime: GenerationRuntime = createMockRuntime())
 
 Update returned properties to include `operation` and `canCompressCurrentTask`.
 
-- [ ] **Step 4: Make Store actions async and event-driven**
+- [x] **Step 4: Make Store actions async and event-driven**
 
 Update Store actions with these signatures:
 
@@ -591,7 +591,7 @@ Implementation rules:
 - For generation events, call `applyTaskEvent` for each event in order and persist after the sequence.
 - Keep `addTemplate`, `saveSettings`, `saveResource`, `loadHistory`, and `deleteHistory` synchronous.
 
-- [ ] **Step 5: Run Store verification**
+- [x] **Step 5: Run Store verification**
 
 Run:
 
@@ -603,7 +603,7 @@ npm run build
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit Store runtime integration**
+- [x] **Step 6: Commit Store runtime integration**
 
 Run:
 
@@ -619,7 +619,7 @@ git commit -m "feat: route app store through generation runtime"
 - Modify: `src/components/DashboardView.test.ts`
 - Modify: `src/styles.css`
 
-- [ ] **Step 1: Add dashboard tests for compression and failure visibility**
+- [x] **Step 1: Add dashboard tests for compression and failure visibility**
 
 Add to `src/components/DashboardView.test.ts`:
 
@@ -643,7 +643,7 @@ it('shows the latest runtime error from the store', async () => {
 })
 ```
 
-- [ ] **Step 2: Run dashboard tests and confirm failure**
+- [x] **Step 2: Run dashboard tests and confirm failure**
 
 Run:
 
@@ -653,7 +653,7 @@ npm run test -- src/components/DashboardView.test.ts
 
 Expected: FAIL because `data-test="compress-task"` and runtime error panel are not implemented.
 
-- [ ] **Step 3: Update dashboard component**
+- [x] **Step 3: Update dashboard component**
 
 In `src/components/DashboardView.vue`:
 
@@ -691,7 +691,7 @@ In `src/components/DashboardView.vue`:
 <button v-if="node.status === 'failed'" type="button" @click="regenerate(node)">重试</button>
 ```
 
-- [ ] **Step 4: Add small CSS states**
+- [x] **Step 4: Add small CSS states**
 
 In `src/styles.css`, add:
 
@@ -708,7 +708,7 @@ In `src/styles.css`, add:
 }
 ```
 
-- [ ] **Step 5: Run dashboard verification**
+- [x] **Step 5: Run dashboard verification**
 
 Run:
 
@@ -719,7 +719,7 @@ npm run build
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit dashboard runtime states**
+- [x] **Step 6: Commit dashboard runtime states**
 
 Run:
 
@@ -735,7 +735,7 @@ git commit -m "feat: show runtime task states on dashboard"
 - Modify: `src/components/SettingsView.test.ts`
 - Modify: `src/styles.css`
 
-- [ ] **Step 1: Add settings tests**
+- [x] **Step 1: Add settings tests**
 
 Add to `src/components/SettingsView.test.ts`:
 
@@ -757,7 +757,7 @@ it('shows a parse status while template parsing is controlled by the store', asy
 })
 ```
 
-- [ ] **Step 2: Run settings tests and confirm failure**
+- [x] **Step 2: Run settings tests and confirm failure**
 
 Run:
 
@@ -767,7 +767,7 @@ npm run test -- src/components/SettingsView.test.ts
 
 Expected: FAIL because Agent test button has no test hook and component does not await Store actions.
 
-- [ ] **Step 3: Update settings component**
+- [x] **Step 3: Update settings component**
 
 In `src/components/SettingsView.vue`:
 
@@ -815,7 +815,7 @@ function importTemplate(template: TemplateConfig): void {
 }
 ```
 
-- [ ] **Step 4: Run settings verification**
+- [x] **Step 4: Run settings verification**
 
 Run:
 
@@ -826,7 +826,7 @@ npm run build
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit settings runtime states**
+- [x] **Step 5: Commit settings runtime states**
 
 Run:
 
@@ -841,7 +841,7 @@ git commit -m "feat: show runtime states in settings"
 - Modify: `README.md`
 - Modify: `docs/superpowers/plans/2026-05-06-soft-copyright-runtime-integration.md`
 
-- [ ] **Step 1: Update README runtime section**
+- [x] **Step 1: Update README runtime section**
 
 Update `README.md` to include:
 
@@ -853,7 +853,7 @@ Update `README.md` to include:
 `mockRuntime` 不访问网络和本地文件系统，只用于浏览器演示和前端状态验证。后续接入 Tauri、本地文件系统、真实 Agent、docx 解析和 zip 输出时，应新增 runtime 实现并复用现有 Store 和组件调用边界。
 ```
 
-- [ ] **Step 2: Run full verification**
+- [x] **Step 2: Run full verification**
 
 Run:
 
@@ -869,11 +869,11 @@ Expected:
 - `npm run build` passes TypeScript and Vite production build.
 - `git status --short` only shows README and this plan until final commit.
 
-- [ ] **Step 3: Mark this plan complete**
+- [x] **Step 3: Mark this plan complete**
 
 Replace every unchecked checkbox in this file with `[x]` after all tasks pass.
 
-- [ ] **Step 4: Commit final docs**
+- [x] **Step 4: Commit final docs**
 
 Run:
 
