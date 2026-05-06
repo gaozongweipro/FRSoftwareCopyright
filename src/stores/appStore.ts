@@ -6,8 +6,8 @@ import {
 } from '../domain/generation'
 import { createDemoTemplate, createInitialSettings } from '../domain/mockData'
 import { createStorageAdapter } from '../domain/storage'
-import { createMockRuntime } from '../runtime/mockRuntime'
-import type { GenerationRuntime } from '../runtime/types'
+import { createDefaultRuntime } from '../runtime/runtimeFactory'
+import type { GenerationRuntime, RuntimeEnvironmentStatus } from '../runtime/types'
 import type {
   AppSettings,
   GenerationTask,
@@ -22,7 +22,7 @@ import type {
 
 const storage = createStorageAdapter('fr-software-copyright')
 
-export function createAppStore(runtime: GenerationRuntime = createMockRuntime()) {
+export function createAppStore(runtime: GenerationRuntime = createDefaultRuntime()) {
   const settings = ref<AppSettings>(storage.load('settings', createInitialSettings()))
   const currentTask = ref<GenerationTask | null>(storage.load('currentTask', null))
   const history = ref<HistoryRecord[]>(storage.load('history', []))
@@ -30,6 +30,7 @@ export function createAppStore(runtime: GenerationRuntime = createMockRuntime())
   const projectTitle = ref(currentTask.value?.title ?? '')
   const systemType = ref<SystemType>(currentTask.value?.systemType ?? 'web')
   const validationIssues = ref<ValidationIssue[]>([])
+  const runtimeStatus = ref<RuntimeEnvironmentStatus | null>(null)
   const operation = ref({
     agentTesting: false,
     templateParsing: false,
@@ -42,6 +43,15 @@ export function createAppStore(runtime: GenerationRuntime = createMockRuntime())
   async function startGeneration(): Promise<boolean> {
     validationIssues.value = validateGenerationStart(projectTitle.value, settings.value)
     if (validationIssues.value.length > 0) {
+      currentTask.value = null
+      storage.remove('currentTask')
+      return false
+    }
+
+    const environmentIssues = await runtime.validateEnvironment(settings.value)
+    if (environmentIssues.length > 0) {
+      operation.value.lastError = environmentIssues[0]
+      runtimeStatus.value = await runtime.getEnvironmentStatus(settings.value)
       currentTask.value = null
       storage.remove('currentTask')
       return false
@@ -71,6 +81,13 @@ export function createAppStore(runtime: GenerationRuntime = createMockRuntime())
 
   function saveSettings(): void {
     storage.save('settings', settings.value)
+  }
+
+  async function refreshRuntimeStatus(): Promise<boolean> {
+    const status = await runtime.getEnvironmentStatus(settings.value)
+    runtimeStatus.value = status
+    operation.value.lastError = status.issues[0] ?? null
+    return status.available
   }
 
   async function testAgent(): Promise<boolean> {
@@ -291,9 +308,11 @@ export function createAppStore(runtime: GenerationRuntime = createMockRuntime())
     projectTitle,
     systemType,
     validationIssues,
+    runtimeStatus,
     operation,
     startGeneration,
     saveSettings,
+    refreshRuntimeStatus,
     testAgent,
     addTemplate,
     parseTemplate,
