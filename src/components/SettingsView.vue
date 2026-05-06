@@ -109,6 +109,34 @@ function importTemplate(template: TemplateConfig): void {
       </div>
     </section>
 
+    <section class="settings-section runtime-section">
+      <header>
+        <h2>运行环境</h2>
+        <button
+          data-test="refresh-runtime-status"
+          type="button"
+          @click="store.refreshRuntimeStatus"
+        >
+          重新检测
+        </button>
+      </header>
+      <div class="runtime-status">
+        <span class="status-pill">
+          {{ store.runtimeStatus.value?.label ?? '未检测' }}
+        </span>
+        <span class="muted-text">
+          最近检测：{{ store.runtimeStatus.value?.checkedAt ?? '未检测' }}
+        </span>
+      </div>
+      <p
+        v-for="issue in store.runtimeStatus.value?.issues ?? []"
+        :key="issue.code"
+        class="inline-error"
+      >
+        {{ issue.message }}
+      </p>
+    </section>
+
     <section class="settings-section">
       <header>
         <h2>模板配置</h2>

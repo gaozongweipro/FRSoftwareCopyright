@@ -381,6 +381,14 @@ h2 {
   gap: 12px;
 }
 
+.runtime-section .runtime-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: center;
+  min-height: 32px;
+}
+
 .settings-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(180px, 1fr));
