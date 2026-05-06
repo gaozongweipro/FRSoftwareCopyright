@@ -6,6 +6,7 @@ import type {
   ResourceArtifact,
   ResourceType,
   SystemType,
+  TaskEvent,
   TaskStats,
   TemplateConfig,
   ValidationIssue,
@@ -131,6 +132,79 @@ export function createGenerationTask(
   }
 }
 
+export function createInitialGenerationTask(
+  title: string,
+  systemType: SystemType,
+  settings: AppSettings
+): GenerationTask {
+  const task = createGenerationTask(title, systemType, settings)
+  const pendingTask: GenerationTask = {
+    ...task,
+    status: 'pending',
+    completedAt: undefined,
+    zipPath: undefined,
+    error: undefined,
+    stages: task.stages.map((stage) => ({
+      ...stage,
+      status: 'pending',
+      nodes: stage.nodes.map((node) => ({
+        ...node,
+        status: 'pending',
+        error: undefined
+      }))
+    }))
+  }
+
+  return {
+    ...pendingTask,
+    stats: calculateTaskStats(pendingTask)
+  }
+}
+
+export function applyTaskEvent(task: GenerationTask, event: TaskEvent): GenerationTask {
+  const updated = applyEventWithoutStats(task, event)
+  return {
+    ...updated,
+    stats: calculateTaskStats(updated)
+  }
+}
+
+export function retryFailedNode(task: GenerationTask, resourceId: string): GenerationTask {
+  const updatedTask: GenerationTask = {
+    ...task,
+    status: 'running',
+    error: undefined,
+    completedAt: undefined,
+    stages: task.stages.map((stage) => {
+      const hasResource = stage.nodes.some((node) => node.resource.id === resourceId)
+      return {
+        ...stage,
+        status: hasResource ? 'running' : stage.status,
+        nodes: stage.nodes.map((node) =>
+          node.resource.id === resourceId
+            ? {
+                ...node,
+                status: 'pending',
+                error: undefined
+              }
+            : node
+        )
+      }
+    })
+  }
+
+  return {
+    ...updatedTask,
+    stats: calculateTaskStats(updatedTask)
+  }
+}
+
+export function canCompressTask(task: GenerationTask | null): boolean {
+  if (!task || task.zipPath) return false
+  const documentStage = task.stages.find((stage) => stage.id === 'document')
+  return task.status === 'completed' && documentStage?.status === 'completed'
+}
+
 export function regenerateResource(
   task: GenerationTask,
   resourceId: string,
@@ -186,6 +260,121 @@ export function compressTask(task: GenerationTask): GenerationTask {
   }
 }
 
+function applyEventWithoutStats(task: GenerationTask, event: TaskEvent): GenerationTask {
+  switch (event.type) {
+    case 'task-started':
+      return {
+        ...task,
+        status: 'running',
+        startedAt: event.at,
+        completedAt: undefined,
+        error: undefined
+      }
+    case 'stage-started':
+      return {
+        ...task,
+        status: 'running',
+        stages: updateStage(task.stages, event.stageId, (stage) => ({
+          ...stage,
+          status: 'running'
+        }))
+      }
+    case 'node-started':
+      return {
+        ...task,
+        status: 'running',
+        stages: updateStage(task.stages, event.stageId, (stage) => ({
+          ...stage,
+          status: 'running',
+          nodes: updateNode(stage.nodes, event.nodeId, (node) => ({
+            ...node,
+            status: 'running',
+            error: undefined
+          }))
+        }))
+      }
+    case 'node-completed':
+      return {
+        ...task,
+        stages: updateStage(task.stages, event.stageId, (stage) => ({
+          ...stage,
+          nodes: updateNode(stage.nodes, event.nodeId, (node) => ({
+            ...node,
+            status: 'completed',
+            resource: event.resource ?? node.resource,
+            error: undefined
+          }))
+        }))
+      }
+    case 'node-failed':
+      return {
+        ...task,
+        status: event.error.recoverable ? 'needs-attention' : 'failed',
+        completedAt: event.at,
+        error: event.error,
+        stages: updateStage(task.stages, event.stageId, (stage) => ({
+          ...stage,
+          status: event.error.recoverable ? 'needs-attention' : 'failed',
+          nodes: updateNode(stage.nodes, event.nodeId, (node) => ({
+            ...node,
+            status: 'failed',
+            error: event.error
+          }))
+        }))
+      }
+    case 'stage-completed':
+      return {
+        ...task,
+        stages: updateStage(task.stages, event.stageId, (stage) => ({
+          ...stage,
+          status: 'completed',
+          nodes: stage.nodes.map((node) => ({
+            ...node,
+            status: node.status === 'failed' ? node.status : 'completed'
+          }))
+        }))
+      }
+    case 'task-completed':
+      return {
+        ...task,
+        status: 'completed',
+        completedAt: event.at,
+        error: undefined
+      }
+    case 'task-failed':
+      return {
+        ...task,
+        status: 'failed',
+        completedAt: event.at,
+        error: event.error
+      }
+    case 'resource-updated':
+      return {
+        ...task,
+        completedAt: event.at,
+        stages: task.stages.map((stage) => ({
+          ...stage,
+          nodes: stage.nodes.map((node) =>
+            node.resource.id === event.resourceId
+              ? {
+                  ...node,
+                  status: 'completed',
+                  resource: event.resource,
+                  error: undefined
+                }
+              : node
+          )
+        }))
+      }
+    case 'archive-created':
+      return {
+        ...task,
+        zipPath: event.zipPath,
+        completedAt: event.at
+      }
+  }
+}
+
 export function calculateTaskStats(task: GenerationTask): TaskStats {
   const resources = task.stages.flatMap((stage) => stage.nodes.map((node) => node.resource))
   const regenerateCount = resources.reduce((sum, resource) => sum + resource.regenerateCount, 0)
@@ -210,6 +399,22 @@ function createStage(id: WorkflowStage['id'], name: string, nodes: WorkflowNode[
     status: 'completed',
     nodes
   }
+}
+
+function updateStage(
+  stages: WorkflowStage[],
+  stageId: WorkflowStage['id'],
+  update: (stage: WorkflowStage) => WorkflowStage
+): WorkflowStage[] {
+  return stages.map((stage) => (stage.id === stageId ? update(stage) : stage))
+}
+
+function updateNode(
+  nodes: WorkflowNode[],
+  nodeId: string,
+  update: (node: WorkflowNode) => WorkflowNode
+): WorkflowNode[] {
+  return nodes.map((node) => (node.id === nodeId ? update(node) : node))
 }
 
 function createNode(

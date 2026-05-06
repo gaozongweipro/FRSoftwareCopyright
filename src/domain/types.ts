@@ -12,6 +12,13 @@ export type NodeStatus = 'pending' | 'running' | 'completed' | 'needs-attention'
 
 export type AgentStatus = 'untested' | 'available' | 'unavailable'
 
+export interface RuntimeErrorInfo {
+  code: string
+  message: string
+  detail?: string
+  recoverable: boolean
+}
+
 export interface BasicSettings {
   outputDirectory: string
   copyrightOwner: string
@@ -56,6 +63,7 @@ export interface TemplateConfig {
   parseStatus: ParseStatus
   analysis: TemplateAnalysis
   lastParsedAt?: string
+  error?: RuntimeErrorInfo
 }
 
 export interface TemplateAnalysis {
@@ -126,6 +134,7 @@ export interface WorkflowNode {
   name: string
   status: NodeStatus
   resource: ResourceArtifact
+  error?: RuntimeErrorInfo
 }
 
 export interface WorkflowStage {
@@ -155,7 +164,32 @@ export interface GenerationTask {
   startedAt: string
   completedAt?: string
   stats: TaskStats
+  error?: RuntimeErrorInfo
 }
+
+export type TaskEvent =
+  | { type: 'task-started'; at: string }
+  | { type: 'stage-started'; stageId: WorkflowStage['id']; at: string }
+  | { type: 'node-started'; stageId: WorkflowStage['id']; nodeId: string; at: string }
+  | {
+      type: 'node-completed'
+      stageId: WorkflowStage['id']
+      nodeId: string
+      at: string
+      resource?: ResourceArtifact
+    }
+  | {
+      type: 'node-failed'
+      stageId: WorkflowStage['id']
+      nodeId: string
+      at: string
+      error: RuntimeErrorInfo
+    }
+  | { type: 'stage-completed'; stageId: WorkflowStage['id']; at: string }
+  | { type: 'task-completed'; at: string }
+  | { type: 'task-failed'; at: string; error: RuntimeErrorInfo }
+  | { type: 'resource-updated'; resourceId: string; at: string; resource: ResourceArtifact }
+  | { type: 'archive-created'; at: string; zipPath: string }
 
 export interface ValidationIssue {
   code: 'missing-title' | 'missing-output-directory' | 'missing-template' | 'agent-unavailable'
