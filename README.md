@@ -11,6 +11,6 @@
 
 ## Runtime
 
-当前版本默认使用 `mockRuntime`，所有 Agent 测试、模板解析、生成、资源重生成和压缩动作都经过 `src/runtime` 的运行时接口。
+当前版本通过 `createDefaultRuntime()` 自动选择运行时：浏览器环境使用 `mockRuntime`，检测到桌面能力后可切换到最小 `tauriRuntime`。所有 Agent 测试、模板解析、生成、资源重生成和压缩动作都经过 `src/runtime` 的运行时接口。
 
-`mockRuntime` 不访问网络和本地文件系统，只用于浏览器演示和前端状态验证。后续接入 Tauri、本地文件系统、真实 Agent、docx 解析和 zip 输出时，应新增 runtime 实现并复用现有 Store 和组件调用边界。
+`mockRuntime` 不访问网络和本地文件系统，只用于浏览器演示和前端状态验证。`tauriRuntime` 当前只负责运行模式识别和产出资源目录环境校验；Agent、docx 解析、真实文件落盘和 zip 输出仍保留为后续接入点。
