@@ -428,14 +428,6 @@ h2 {
   font-weight: 700;
 }
 
-.hidden-test-button {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  opacity: 0;
-}
-
 .analysis-panel {
   display: grid;
   gap: 16px;

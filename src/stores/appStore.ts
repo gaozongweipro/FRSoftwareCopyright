@@ -56,7 +56,15 @@ export function createAppStore() {
   }
 
   function addTemplate(fileName: string, type: TemplateType): void {
-    settings.value.templates = [...settings.value.templates, createDemoTemplate(fileName, type)]
+    const template = createDemoTemplate(fileName, type)
+    settings.value.templates = [
+      ...settings.value.templates,
+      {
+        ...template,
+        parseStatus: 'pending',
+        lastParsedAt: undefined
+      }
+    ]
     saveSettings()
   }
 

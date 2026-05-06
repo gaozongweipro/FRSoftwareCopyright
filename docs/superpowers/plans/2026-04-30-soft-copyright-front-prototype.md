@@ -1,6 +1,6 @@
 # 软著生成工具前端原型实施计划
 
-> **给 agentic workers：** 必须使用子技能：推荐使用 `superpowers:subagent-driven-development`，也可以使用 `superpowers:executing-plans`，按任务逐步实施本计划。步骤使用复选框（`- [ ]`）语法跟踪。
+> **给 agentic workers：** 必须使用子技能：推荐使用 `superpowers:subagent-driven-development`，也可以使用 `superpowers:executing-plans`，按任务逐步实施本计划。步骤使用复选框（`- [x]`）语法跟踪。
 
 **目标：** 构建一个 Vue 单页前端原型，用模拟数据演示完整软著生成流程，包括生成前校验、设置配置、资源查看、资源重生成和历史回放。
 
@@ -71,7 +71,7 @@
 - 创建：`src/styles.css`
 - 创建：`src/test/setup.ts`
 
-- [ ] **步骤 1：创建 package manifest**
+- [x] **步骤 1：创建 package manifest**
 
 创建 `package.json`：
 
@@ -104,7 +104,7 @@
 }
 ```
 
-- [ ] **步骤 2：添加 Vite 和 TypeScript 配置**
+- [x] **步骤 2：添加 Vite 和 TypeScript 配置**
 
 创建 `vite.config.ts`：
 
@@ -161,23 +161,23 @@ export default defineConfig({
 }
 ```
 
-- [ ] **步骤 3：添加应用入口**
+- [x] **步骤 3：添加应用入口**
 
 创建 `index.html`、`src/main.ts`、`src/test/setup.ts`、临时的 `src/App.vue` 和 `src/styles.css`，让应用能渲染一个基础 shell 标题。
 
-- [ ] **步骤 4：安装依赖**
+- [x] **步骤 4：安装依赖**
 
 运行：`npm install`
 
 预期：生成 `package-lock.json`，并且 npm 以 code 0 退出。
 
-- [ ] **步骤 5：验证脚手架**
+- [x] **步骤 5：验证脚手架**
 
 运行：`npm run build`
 
 预期：TypeScript 通过，Vite 输出 `dist/`。
 
-- [ ] **步骤 6：提交**
+- [x] **步骤 6：提交**
 
 ```bash
 git add package.json package-lock.json index.html vite.config.ts tsconfig.json tsconfig.node.json src
@@ -193,7 +193,7 @@ git commit -m "chore: scaffold vue prototype app"
 - 创建：`src/domain/storage.test.ts`
 - 创建：`src/domain/mockData.test.ts`
 
-- [ ] **步骤 1：编写类型和模拟数据测试**
+- [x] **步骤 1：编写类型和模拟数据测试**
 
 创建 `src/domain/mockData.test.ts`：
 
@@ -239,17 +239,17 @@ describe('storage adapter', () => {
 })
 ```
 
-- [ ] **步骤 2：运行测试确认失败**
+- [x] **步骤 2：运行测试确认失败**
 
 运行：`npm run test -- src/domain/mockData.test.ts src/domain/storage.test.ts`
 
 预期：失败，因为相关模块尚不存在。
 
-- [ ] **步骤 3：实现领域类型**
+- [x] **步骤 3：实现领域类型**
 
 创建 `src/domain/types.ts`，显式定义 `PageId`、`TemplateType`、`ResourceType`、`NodeStatus` 等 union，并定义设置、模板解析、资源、生成任务、校验问题和历史记录接口。`AgentConfig.status` 必须是 `'untested' | 'available' | 'unavailable'`。
 
-- [ ] **步骤 4：实现模拟数据构造器**
+- [x] **步骤 4：实现模拟数据构造器**
 
 创建 `src/domain/mockData.ts`，包含：
 
@@ -262,7 +262,7 @@ export function buildDocumentContent(title: string, resourceName: string): strin
 
 模板解析必须包含以下内容：封面、目录、章节、表格、截图区域、源码区域和附录等结构节点；项目名称、著作权人、功能、架构、页面流程、源码、截图说明和生成日期等动态字段；字体、字号、颜色、段落间距、行间距、对齐方式、标题层级、编号和表格单元格样式等样式规则。
 
-- [ ] **步骤 5：实现 storage adapter**
+- [x] **步骤 5：实现 storage adapter**
 
 创建 `src/domain/storage.ts`：
 
@@ -288,13 +288,13 @@ export function createStorageAdapter(namespace: string) {
 }
 ```
 
-- [ ] **步骤 6：确认测试通过**
+- [x] **步骤 6：确认测试通过**
 
 运行：`npm run test -- src/domain/mockData.test.ts src/domain/storage.test.ts`
 
 预期：PASS。
 
-- [ ] **步骤 7：提交**
+- [x] **步骤 7：提交**
 
 ```bash
 git add src/domain
@@ -307,7 +307,7 @@ git commit -m "feat: add prototype domain model and persistence"
 - 创建：`src/domain/generation.ts`
 - 创建：`src/domain/generation.test.ts`
 
-- [ ] **步骤 1：编写生成流程测试**
+- [x] **步骤 1：编写生成流程测试**
 
 创建 `src/domain/generation.test.ts`：
 
@@ -359,13 +359,13 @@ describe('generation workflow', () => {
 })
 ```
 
-- [ ] **步骤 2：运行测试确认失败**
+- [x] **步骤 2：运行测试确认失败**
 
 运行：`npm run test -- src/domain/generation.test.ts`
 
 预期：失败，因为 `generation.ts` 尚不存在。
 
-- [ ] **步骤 3：实现校验和任务构造器**
+- [x] **步骤 3：实现校验和任务构造器**
 
 创建 `src/domain/generation.ts`，包含：
 
@@ -379,13 +379,13 @@ export function calculateTaskStats(task: GenerationTask): TaskStats
 
 校验问题必须按以下顺序返回：标题、产出资源目录、模板、Agent。`createGenerationTask` 必须创建固定的项目分析、项目编码、图片截取阶段，并根据 `settings.templates` 创建动态文档生成阶段。
 
-- [ ] **步骤 4：确认测试通过**
+- [x] **步骤 4：确认测试通过**
 
 运行：`npm run test -- src/domain/generation.test.ts`
 
 预期：PASS。
 
-- [ ] **步骤 5：提交**
+- [x] **步骤 5：提交**
 
 ```bash
 git add src/domain/generation.ts src/domain/generation.test.ts
@@ -398,7 +398,7 @@ git commit -m "feat: add simulated generation workflow"
 - 创建：`src/stores/appStore.ts`
 - 创建：`src/stores/appStore.test.ts`
 
-- [ ] **步骤 1：编写 store 测试**
+- [x] **步骤 1：编写 store 测试**
 
 创建 `src/stores/appStore.test.ts`：
 
@@ -428,13 +428,13 @@ describe('app store', () => {
 })
 ```
 
-- [ ] **步骤 2：运行测试确认失败**
+- [x] **步骤 2：运行测试确认失败**
 
 运行：`npm run test -- src/stores/appStore.test.ts`
 
 预期：失败，因为 store 尚不存在。
 
-- [ ] **步骤 3：实现 store 门面**
+- [x] **步骤 3：实现 store 门面**
 
 创建 `src/stores/appStore.ts`，提供 `createAppStore()` 函数，返回 Vue refs 和 actions：
 
@@ -465,13 +465,13 @@ export function createAppStore() {
 
 原型阶段，`testAgent()` 在 baseUrl、apiKey 和 model 都非空时将状态设为 `available`；否则设为 `unavailable`。
 
-- [ ] **步骤 4：确认测试通过**
+- [x] **步骤 4：确认测试通过**
 
 运行：`npm run test -- src/stores/appStore.test.ts`
 
 预期：PASS。
 
-- [ ] **步骤 5：提交**
+- [x] **步骤 5：提交**
 
 ```bash
 git add src/stores
@@ -487,7 +487,7 @@ git commit -m "feat: add reactive prototype store"
 - 创建：`src/components/ToastStack.vue`
 - 创建：`src/components/DashboardView.test.ts`
 
-- [ ] **步骤 1：编写首页组件测试**
+- [x] **步骤 1：编写首页组件测试**
 
 创建 `src/components/DashboardView.test.ts`：
 
@@ -509,17 +509,17 @@ describe('DashboardView', () => {
 })
 ```
 
-- [ ] **步骤 2：运行测试确认失败**
+- [x] **步骤 2：运行测试确认失败**
 
 运行：`npm run test -- src/components/DashboardView.test.ts`
 
 预期：失败，因为组件尚不存在。
 
-- [ ] **步骤 3：实现 shell 组件**
+- [x] **步骤 3：实现 shell 组件**
 
 将 `App.vue` 实现为应用 shell：创建单个 store 实例，并根据当前页面渲染首页、设置和历史记录。实现 `AppNav.vue`，包含三个按钮：首页、设置、历史记录。
 
-- [ ] **步骤 4：实现首页工作台**
+- [x] **步骤 4：实现首页工作台**
 
 `DashboardView.vue` 必须渲染：
 
@@ -531,7 +531,7 @@ describe('DashboardView', () => {
 - 四阶段执行流程。
 - 节点操作：预览/编辑、重新生成、建议重生成。
 
-- [ ] **步骤 5：验证首页测试和构建**
+- [x] **步骤 5：验证首页测试和构建**
 
 运行：`npm run test -- src/components/DashboardView.test.ts`
 
@@ -541,7 +541,7 @@ describe('DashboardView', () => {
 
 预期：PASS。
 
-- [ ] **步骤 6：提交**
+- [x] **步骤 6：提交**
 
 ```bash
 git add src/App.vue src/components src/styles.css
@@ -555,7 +555,7 @@ git commit -m "feat: build dashboard workflow shell"
 - 创建：`src/components/TemplateAnalysisModal.vue`
 - 创建：`src/components/SettingsView.test.ts`
 
-- [ ] **步骤 1：编写设置页测试**
+- [x] **步骤 1：编写设置页测试**
 
 创建 `src/components/SettingsView.test.ts`：
 
@@ -578,21 +578,21 @@ describe('SettingsView', () => {
 })
 ```
 
-- [ ] **步骤 2：运行测试确认失败**
+- [x] **步骤 2：运行测试确认失败**
 
 运行：`npm run test -- src/components/SettingsView.test.ts`
 
 预期：失败，因为组件尚不存在。
 
-- [ ] **步骤 3：实现设置分组**
+- [x] **步骤 3：实现设置分组**
 
 `SettingsView.vue` 必须渲染基本信息、模板配置、Agent 配置、备注信息和系统设置。包含设计文档中的所有公司字段，并支持保存。
 
-- [ ] **步骤 4：实现模板解析弹窗**
+- [x] **步骤 4：实现模板解析弹窗**
 
 `TemplateAnalysisModal.vue` 必须允许编辑结构节点名称、动态字段说明、样式规则值和 `enabled` 状态。不得出现占位符措辞、一键验证或一键修复控件。
 
-- [ ] **步骤 5：验证**
+- [x] **步骤 5：验证**
 
 运行：`npm run test -- src/components/SettingsView.test.ts`
 
@@ -602,7 +602,7 @@ describe('SettingsView', () => {
 
 预期：PASS。
 
-- [ ] **步骤 6：提交**
+- [x] **步骤 6：提交**
 
 ```bash
 git add src/components/SettingsView.vue src/components/TemplateAnalysisModal.vue src/components/SettingsView.test.ts
@@ -617,7 +617,7 @@ git commit -m "feat: add settings and template analysis UI"
 - 创建：`src/components/ResourceModal.test.ts`
 - 创建：`src/components/HistoryView.test.ts`
 
-- [ ] **步骤 1：编写资源弹窗测试**
+- [x] **步骤 1：编写资源弹窗测试**
 
 创建 `src/components/ResourceModal.test.ts`：
 
@@ -648,7 +648,7 @@ describe('ResourceModal', () => {
 })
 ```
 
-- [ ] **步骤 2：编写历史记录测试**
+- [x] **步骤 2：编写历史记录测试**
 
 创建 `src/components/HistoryView.test.ts`：
 
@@ -667,13 +667,13 @@ describe('HistoryView', () => {
 })
 ```
 
-- [ ] **步骤 3：运行测试确认失败**
+- [x] **步骤 3：运行测试确认失败**
 
 运行：`npm run test -- src/components/ResourceModal.test.ts src/components/HistoryView.test.ts`
 
 预期：失败，因为组件尚不存在。
 
-- [ ] **步骤 4：实现资源弹窗**
+- [x] **步骤 4：实现资源弹窗**
 
 弹窗必须满足：
 
@@ -682,11 +682,11 @@ describe('HistoryView', () => {
 - 为所有资源渲染重新生成和建议重生成控制。
 - 显示建议历史。
 
-- [ ] **步骤 5：实现历史记录**
+- [x] **步骤 5：实现历史记录**
 
 `HistoryView.vue` 必须渲染标题、系统类型、状态、生成时间、模板数量、资源数量、耗时、加载操作和删除操作。加载历史记录时必须恢复首页中的对应任务。
 
-- [ ] **步骤 6：验证**
+- [x] **步骤 6：验证**
 
 运行：`npm run test -- src/components/ResourceModal.test.ts src/components/HistoryView.test.ts`
 
@@ -696,7 +696,7 @@ describe('HistoryView', () => {
 
 预期：PASS。
 
-- [ ] **步骤 7：提交**
+- [x] **步骤 7：提交**
 
 ```bash
 git add src/components/ResourceModal.vue src/components/HistoryView.vue src/components/*Modal.test.ts src/components/HistoryView.test.ts
@@ -711,7 +711,7 @@ git commit -m "feat: add resource modal and history replay"
 - 修改：`src/components/*.vue`
 - 创建：`README.md`
 
-- [ ] **步骤 1：添加 README**
+- [x] **步骤 1：添加 README**
 
 创建 `README.md`：
 
@@ -728,7 +728,7 @@ git commit -m "feat: add resource modal and history replay"
 - `npm run build`
 ```
 
-- [ ] **步骤 2：打磨桌面端布局**
+- [x] **步骤 2：打磨桌面端布局**
 
 确保 UI 克制并符合桌面工具气质：
 
@@ -738,25 +738,25 @@ git commit -m "feat: add resource modal and history replay"
 - 1366px 宽度下没有整页水平溢出。
 - 较窄桌面宽度下按钮和标签不重叠。
 
-- [ ] **步骤 3：运行完整测试**
+- [x] **步骤 3：运行完整测试**
 
 运行：`npm run test`
 
 预期：全部测试 PASS。
 
-- [ ] **步骤 4：运行生产构建**
+- [x] **步骤 4：运行生产构建**
 
 运行：`npm run build`
 
 预期：TypeScript 和 Vite 构建 PASS。
 
-- [ ] **步骤 5：启动开发服务器供人工 review**
+- [x] **步骤 5：启动开发服务器供人工 review**
 
 运行：`npm run dev`
 
 预期：Vite 输出本地 URL，通常是 `http://127.0.0.1:5173/`。
 
-- [ ] **步骤 6：人工验收清单**
+- [x] **步骤 6：人工验收清单**
 
 在浏览器中检查：
 
@@ -771,7 +771,7 @@ git commit -m "feat: add resource modal and history replay"
 - 刷新浏览器，确认设置和历史记录仍保留。
 - 加载一条历史记录，确认首页恢复该任务。
 
-- [ ] **步骤 7：提交**
+- [x] **步骤 7：提交**
 
 ```bash
 git add README.md src

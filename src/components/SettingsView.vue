@@ -24,14 +24,6 @@ function addTemplate(type: TemplateType, fileName: string): void {
   props.store.addTemplate(fileName, type)
 }
 
-function parseFirstTemplate(): void {
-  const template = props.store.settings.value.templates[0]
-  if (template) {
-    props.store.parseTemplate(template.id)
-    activeTemplateId.value = template.id
-  }
-}
-
 function deleteTemplate(templateId: string): void {
   props.store.settings.value.templates = props.store.settings.value.templates.filter(
     (template) => template.id !== templateId
@@ -148,9 +140,6 @@ function importTemplate(template: TemplateConfig): void {
         </article>
         <p v-if="!store.settings.value.templates.length" class="muted-text">尚未添加模板。</p>
       </div>
-      <button v-if="store.settings.value.templates.length" class="hidden-test-button" data-test="parse-template" type="button" @click="parseFirstTemplate">
-        解析首个模板
-      </button>
     </section>
 
     <section class="settings-section">
