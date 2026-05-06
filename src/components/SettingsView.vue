@@ -38,7 +38,15 @@ function exportTemplate(template: TemplateConfig): void {
 function importTemplate(template: TemplateConfig): void {
   const raw = window.prompt('粘贴解析 JSON')
   if (!raw) return
-  props.store.updateTemplateAnalysis(template.id, JSON.parse(raw))
+  try {
+    props.store.updateTemplateAnalysis(template.id, JSON.parse(raw))
+  } catch {
+    props.store.operation.value.lastError = {
+      code: 'invalid-template-json',
+      message: '解析 JSON 格式不正确，请检查后重新导入。',
+      recoverable: true
+    }
+  }
 }
 </script>
 
@@ -122,6 +130,7 @@ function importTemplate(template: TemplateConfig): void {
           <div>
             <h3>{{ template.name }}</h3>
             <p>{{ template.fileName }} · {{ template.parseStatus }}</p>
+            <p v-if="template.error" class="inline-error">{{ template.error.message }}</p>
             <p>
               结构节点 {{ template.analysis.structureNodes.length }} · 动态内容字段
               {{ template.analysis.dynamicFields.length }} · 样式规则 {{ template.analysis.styleRules.length }}
@@ -147,6 +156,9 @@ function importTemplate(template: TemplateConfig): void {
         <h2>Agent 配置</h2>
         <span class="status-pill">{{ store.settings.value.agent.status }}</span>
       </header>
+      <p v-if="store.operation.value.lastError" class="inline-error">
+        {{ store.operation.value.lastError.message }}
+      </p>
       <div class="settings-grid">
         <label class="field">
           <span>baseUrl</span>
@@ -163,7 +175,14 @@ function importTemplate(template: TemplateConfig): void {
       </div>
       <div class="header-actions">
         <button type="button" @click="store.saveSettings">保存配置</button>
-        <button type="button" @click="store.testAgent">测试连接</button>
+        <button
+          data-test="test-agent"
+          type="button"
+          :disabled="store.operation.value.agentTesting"
+          @click="store.testAgent"
+        >
+          {{ store.operation.value.agentTesting ? '测试中' : '测试连接' }}
+        </button>
         <button type="button">导入配置 JSON</button>
         <button type="button">导出配置 JSON</button>
       </div>
