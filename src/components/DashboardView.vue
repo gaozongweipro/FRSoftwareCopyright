@@ -2,14 +2,13 @@
 import { computed, ref } from 'vue'
 import type { ResourceArtifact, WorkflowNode } from '../domain/types'
 import type { createAppStore } from '../stores/appStore'
+import ResourceModal from './ResourceModal.vue'
 
 const props = defineProps<{
   store: ReturnType<typeof createAppStore>
 }>()
 
 const selectedResource = ref<ResourceArtifact | null>(null)
-const suggestionText = ref('')
-
 const task = computed(() => props.store.currentTask.value)
 const stats = computed(() => task.value?.stats)
 const documentStage = computed(() => task.value?.stages.find((stage) => stage.id === 'document'))
@@ -20,12 +19,10 @@ function startGeneration(): void {
 
 function openResource(resource: ResourceArtifact): void {
   selectedResource.value = resource
-  suggestionText.value = ''
 }
 
-function saveSelectedResource(): void {
-  if (!selectedResource.value) return
-  props.store.saveResource(selectedResource.value.id, selectedResource.value.content)
+function saveResource(resourceId: string, content: string): void {
+  props.store.saveResource(resourceId, content)
   selectedResource.value = null
 }
 
@@ -33,14 +30,14 @@ function regenerate(node: WorkflowNode): void {
   props.store.regenerate(node.resource.id)
 }
 
-function regenerateWithSuggestion(): void {
-  if (!selectedResource.value) return
-  props.store.regenerate(selectedResource.value.id, suggestionText.value)
+function regenerateResource(resourceId: string): void {
+  props.store.regenerate(resourceId)
   selectedResource.value = null
 }
 
-function compress(): void {
-  props.store.compressCurrentTask()
+function regenerateWithSuggestion(resourceId: string, suggestion: string): void {
+  props.store.regenerate(resourceId, suggestion)
+  selectedResource.value = null
 }
 </script>
 
@@ -96,7 +93,7 @@ function compress(): void {
         <span>文档地址</span>
         <strong>{{ task?.documentDirectory ?? '生成后显示' }}</strong>
       </button>
-      <button class="address-button" type="button" :disabled="!task" @click="compress">
+      <button class="address-button" type="button" :disabled="!task" @click="store.compressCurrentTask">
         <span>压缩包</span>
         <strong>{{ task?.zipPath ?? '待压缩输出' }}</strong>
       </button>
@@ -134,30 +131,13 @@ function compress(): void {
       </article>
     </section>
 
-    <div v-if="selectedResource" class="modal-backdrop" role="dialog" aria-modal="true">
-      <section class="resource-panel">
-        <header>
-          <h2>{{ selectedResource.name }}</h2>
-          <button type="button" @click="selectedResource = null">关闭</button>
-        </header>
-        <textarea
-          v-if="selectedResource.type !== 'html-demo'"
-          v-model="selectedResource.content"
-          aria-label="资源内容"
-        />
-        <div v-else class="html-preview">
-          <strong>预览</strong>
-          <p>{{ selectedResource.content }}</p>
-        </div>
-        <label class="field">
-          <span>建议后重新生成</span>
-          <input v-model="suggestionText" placeholder="补充生成建议" />
-        </label>
-        <div class="modal-actions">
-          <button type="button" @click="saveSelectedResource">保存</button>
-          <button type="button" @click="regenerateWithSuggestion">按建议重生成</button>
-        </div>
-      </section>
-    </div>
+    <ResourceModal
+      v-if="selectedResource"
+      :resource="selectedResource"
+      @close="selectedResource = null"
+      @save="saveResource"
+      @regenerate="regenerateResource"
+      @suggest="regenerateWithSuggestion"
+    />
   </section>
 </template>

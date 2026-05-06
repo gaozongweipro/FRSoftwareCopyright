@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AppNav from './components/AppNav.vue'
 import DashboardView from './components/DashboardView.vue'
+import HistoryView from './components/HistoryView.vue'
 import SettingsView from './components/SettingsView.vue'
 import ToastStack from './components/ToastStack.vue'
 import { createAppStore } from './stores/appStore'
@@ -19,10 +20,7 @@ const store = createAppStore()
     <section class="app-content">
       <DashboardView v-if="store.page.value === 'dashboard'" :store="store" />
       <SettingsView v-else-if="store.page.value === 'settings'" :store="store" />
-      <section v-else class="placeholder-view">
-        <h2>历史记录</h2>
-        <p>历史回放将在后续任务接入。</p>
-      </section>
+      <HistoryView v-else :store="store" />
     </section>
     <ToastStack />
   </main>
