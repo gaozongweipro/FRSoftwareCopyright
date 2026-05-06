@@ -13,6 +13,15 @@ import type {
 
 export function createMockRuntime(): GenerationRuntime {
   return {
+    async getEnvironmentStatus() {
+      return {
+        mode: 'mock',
+        label: '浏览器模拟运行时',
+        available: true,
+        checkedAt: nowText(),
+        issues: []
+      }
+    },
     async validateEnvironment() {
       return []
     },

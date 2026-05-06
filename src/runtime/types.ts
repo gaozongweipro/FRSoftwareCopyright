@@ -41,7 +41,24 @@ export interface RuntimeArchiveResult {
   error?: RuntimeErrorInfo
 }
 
+export type RuntimeMode = 'mock' | 'tauri'
+
+export interface RuntimeEnvironmentStatus {
+  mode: RuntimeMode
+  label: string
+  available: boolean
+  checkedAt: string
+  issues: RuntimeErrorInfo[]
+}
+
+export interface DirectoryCheckResult {
+  exists: boolean
+  writable: boolean
+  message?: string
+}
+
 export interface GenerationRuntime {
+  getEnvironmentStatus(settings: AppSettings): Promise<RuntimeEnvironmentStatus>
   validateEnvironment(settings: AppSettings): Promise<RuntimeErrorInfo[]>
   testAgent(config: AgentConfig): Promise<AgentTestResult>
   parseTemplate(template: TemplateConfig, settings: AppSettings): Promise<TemplateParseResult>

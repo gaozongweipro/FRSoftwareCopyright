@@ -42,4 +42,14 @@ describe('mock runtime', () => {
     expect(result.events[0].type).toBe('task-started')
     expect(result.events.some((event) => event.type === 'task-completed')).toBe(true)
   })
+
+  it('reports browser mock runtime status', async () => {
+    const runtime = createMockRuntime()
+    const status = await runtime.getEnvironmentStatus(createInitialSettings())
+
+    expect(status.mode).toBe('mock')
+    expect(status.label).toBe('浏览器模拟运行时')
+    expect(status.available).toBe(true)
+    expect(status.issues).toEqual([])
+  })
 })
